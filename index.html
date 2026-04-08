@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shadowverse HQ — Hobby Quest</title>
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --surface2:  #22263a;
+      --border:    rgba(255,255,255,0.08);
+      --border2:   rgba(255,255,255,0.15);
+      --text:      #e8eaf0;
+      --muted:     #8890a8;
+      --accent:    #5b8cff;
+      --accent-dk: #3a6be0;
+      --gold:      #f5c842;
+      --silver:    #b0b8d0;
+      --bronze:    #d4895a;
+      --green:     #3ecf8e;
+      --green-dk:  #27a870;
+      --red:       #e05c5c;
+      --radius:    10px;
+      --radius-lg: 16px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── Layout ── */
+    .shell {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 24px 16px 80px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+    .header p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px 4px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .tab.active {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border2);
+    }
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    /* ── Form elements ── */
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 5px;
+      margin-top: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    label:first-child { margin-top: 0; }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 14px;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color .15s;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238890a8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    select option { background: #1a1d27; }
+
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+    hr.divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+
+    /* ── Placement blocks ── */
+    .placement-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0 12px;
+    }
+    .placement-header:first-of-type { margin-top: 0; }
+    .place-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .place-badge.p1 { background: rgba(245,200,66,0.15); color: var(--gold); border: 1px solid rgba(245,200,66,0.3); }
+    .place-badge.p2 { background: rgba(176,184,208,0.12); color: var(--silver); border: 1px solid rgba(176,184,208,0.25); }
+    .place-badge.p3 { background: rgba(212,137,90,0.12); color: var(--bronze); border: 1px solid rgba(212,137,90,0.25); }
+    .placement-label { font-size: 14px; font-weight: 600; }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--text);
+      transition: all .15s;
+    }
+    .btn:hover { background: var(--surface2); }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--accent); border-color: var(--accent-dk); color: #fff; }
+    .btn-primary:hover { background: var(--accent-dk); }
+    .btn-green { background: var(--green); border-color: var(--green-dk); color: #0a1a12; }
+    .btn-green:hover { background: var(--green-dk); }
+    .btn-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+    /* ── Status bar ── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .status-bar.ok   { background: rgba(62,207,142,0.1); border: 1px solid rgba(62,207,142,0.2); color: var(--green); }
+    .status-bar.err  { background: rgba(224,92,92,0.1);  border: 1px solid rgba(224,92,92,0.2);  color: var(--red); }
+    .status-bar.info { background: rgba(91,140,255,0.1); border: 1px solid rgba(91,140,255,0.2); color: var(--accent); }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transition: all .3s;
+      z-index: 999;
+      white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #toast.success { border-color: var(--green); color: var(--green); }
+    #toast.error   { border-color: var(--red);   color: var(--red); }
+
+    /* ── Leaderboard ── */
+    .lb-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .lb-table th {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .lb-table td {
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .lb-table tr:last-child td { border-bottom: none; }
+    .lb-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .lb-rank { font-weight: 700; font-size: 15px; }
+    .lb-pts  { font-weight: 700; font-size: 16px; text-align: right; color: var(--accent); }
+    .lb-sub  { font-size: 12px; color: var(--muted); }
+
+    /* ── Historial ── */
+    .hist-item {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .hist-item:last-child { border-bottom: none; }
+    .hist-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .hist-players { display: flex; flex-wrap: wrap; gap: 6px; }
+    .player-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .craft-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .hist-empty {
+      text-align: center;
+      padding: 32px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* ── Config section ── */
+    .config-url {
+      font-family: monospace;
+      font-size: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      color: var(--accent);
+      word-break: break-all;
+      margin-top: 8px;
+    }
+    .config-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.7;
+    }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 480px) {
+      .row2 { grid-template-columns: 1fr; }
+      .row3 { grid-template-columns: 1fr 1fr; }
+      .tabs .tab { font-size: 12px; padding: 7px 2px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="header">
+    <h1>⚔️ Shadowverse HQ</h1>
+    <p>Tracker de torneos · Hobby Quest</p>
+  </div>
+
+  <!-- Connection status -->
+  <div id="conn-status" class="status-bar info">
+    <div class="dot"></div>
+    <span id="conn-text">Conectando con Google Sheets...</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('registro')">Registrar</button>
+    <button class="tab" onclick="showTab('leaderboard')">Ranking</button>
+    <button class="tab" onclick="showTab('historial')">Historial</button>
+    <button class="tab" onclick="showTab('config')">Config</button>
+  </div>
+
+  <!-- ══ REGISTRO ══ -->
+  <div id="tab-registro" class="section active">
+    <div class="card">
+      <div class="card-title">Nuevo resultado</div>
+
+      <div class="row2">
+        <div>
+          <label>Nombre del torneo</label>
+          <input type="text" id="t-name" placeholder="Ej: Abril 1/4">
+        </div>
+        <div>
+          <label>Fecha</label>
+          <input type="date" id="t-date">
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <label>Tipo</label>
+        <select id="t-type">
+          <option value="regular">Regular (semanal)</option>
+          <option value="special">Torneo especial</option>
+        </select>
+      </div>
+
+      <hr class="divider">
+
+      <!-- 1st place -->
+      <div class="placement-header">
+        <div class="place-badge p1">1</div>
+        <span class="placement-label">Primer lugar</span>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Jugador</label>
+          <input type="text" id="p1-player" placeholder="Nombre">
+        </div>
+        <div>
+          <label>Craft</label>
+          <select id="p1-craft" onchange="updateDecks('p1')">
+            <option value="">— Seleccionar —</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2" style="margin-top:10px">
+        <div>
+          <label>Deck</label>
+          <select id="p1-deck"><option value="">— Seleccionar craft primero —</option></select>
+        </div>
+        <div>
+          <label>Deck (personalizado)</label>
+          <input type="text" id="p1-deck-custom" placeholder="O escribe aquí">
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <label>Link deck list (decklog)</label>
+        <input type="url" id="p1-link" placeholder="https://decklog-en.bushiroad.com/view/...">
+      </div>
+
+      <!-- 2nd place -->
+      <div class="placement-header">
+        <div class="place-badge p2">2</div>
+        <span class="placement-label">Segundo lugar</span>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Jugador</label>
+          <input type="text" id="p2-player" placeholder="Nombre">
+        </div>
+        <div>
+          <label>Craft</label>
+          <select id="p2-craft" onchange="updateDecks('p2')">
+            <option value="">— Seleccionar —</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2" style="margin-top:10px">
+        <div>
+          <label>Deck</label>
+          <select id="p2-deck"><option value="">— Seleccionar craft primero —</option></select>
+        </div>
+        <div>
+          <label>Deck (personalizado)</label>
+          <input type="text" id="p2-deck-custom" placeholder="O escribe aquí">
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <label>Link deck list (decklog)</label>
+        <input type="url" id="p2-link" placeholder="https://decklog-en.bushiroad.com/view/...">
+      </div>
+
+      <!-- 3rd place -->
+      <div class="placement-header">
+        <div class="place-badge p3">3</div>
+        <span class="placement-label">Tercer lugar</span>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Jugador</label>
+          <input type="text" id="p3-player" placeholder="Nombre">
+        </div>
+        <div>
+          <label>Craft</label>
+          <select id="p3-craft" onchange="updateDecks('p3')">
+            <option value="">— Seleccionar —</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2" style="margin-top:10px">
+        <div>
+          <label>Deck</label>
+          <select id="p3-deck"><option value="">— Seleccionar craft primero —</option></select>
+        </div>
+        <div>
+          <label>Deck (personalizado)</label>
+          <input type="text" id="p3-deck-custom" placeholder="O escribe aquí">
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <label>Link deck list (decklog)</label>
+        <input type="url" id="p3-link" placeholder="https://decklog-en.bushiroad.com/view/...">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" onclick="clearForm()">Limpiar</button>
+        <button class="btn btn-green" id="btn-save" onclick="saveResult()">Guardar resultado</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LEADERBOARD ══ -->
+  <div id="tab-leaderboard" class="section">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:0">Ranking 2026</div>
+        <button class="btn" style="padding:6px 12px;font-size:12px" onclick="loadLeaderboard()">Actualizar</button>
+      </div>
+      <table class="lb-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Jugador</th>
+            <th style="text-align:center">🥇</th>
+            <th style="text-align:center">🥈</th>
+            <th style="text-align:center">🥉</th>
+            <th style="text-align:right">Pts</th>
+          </tr>
+        </thead>
+        <tbody id="lb-body">
+          <tr><td colspan="6" class="hist-empty">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:12px;color:var(--muted);text-align:center">1ro = 3 pts · 2do = 2 pts · 3ro = 1 pt</p>
+  </div>
+
+  <!-- ══ HISTORIAL ══ -->
+  <div id="tab-historial" class="section">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div class="card-title" style="margin-bottom:0">Historial de torneos</div>
+        <button class="btn" style="padding:6px 12px;font-size:12px" onclick="loadHistory()">Actualizar</button>
+      </div>
+      <div id="historial-list">
+        <div class="hist-empty">Cargando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CONFIG ══ -->
+  <div id="tab-config" class="section">
+    <div class="card">
+      <div class="card-title">Configuración del script</div>
+      <label>URL del Apps Script</label>
+      <input type="url" id="script-url" placeholder="https://script.google.com/macros/s/.../exec"
+             oninput="saveScriptUrl()">
+      <div class="config-hint">
+        Pega aquí la URL que obtuviste al publicar el Apps Script en Google Sheets.<br>
+        Se guarda automáticamente en tu navegador.
+      </div>
+
+      <div style="margin-top:20px">
+        <button class="btn btn-primary" onclick="testConnection()">Probar conexión</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Instrucciones rápidas</div>
+      <ol style="font-size:13px;color:var(--muted);line-height:2;padding-left:18px">
+        <li>Abre tu Google Sheet → <strong style="color:var(--text)">Extensiones → Apps Script</strong></li>
+        <li>Borra el contenido y pega el archivo <code style="color:var(--accent)">Code.gs</code></li>
+        <li>Clic en <strong style="color:var(--text)">Guardar</strong></li>
+        <li>Clic en <strong style="color:var(--text)">Implementar → Nueva implementación</strong></li>
+        <li>Tipo: <strong style="color:var(--text)">Aplicación web</strong> · Acceso: <strong style="color:var(--text)">Cualquier usuario</strong></li>
+        <li>Copia la URL y pégala arriba</li>
+      </ol>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Crafts & decks ──────────────────────────────────────────
+const CRAFTS = {
+  "Forest":      ["Ladica","Puppet","Sekka Wasteland","Hunter","Aggro Forest","Control Forest"],
+  "Sword":       ["Usurpation","Festive","Midrange Sword","Aggro Sword","Control Sword"],
+  "Rune":        ["Item Shop","Kuon","Spellboost","Artifact Rune"],
+  "Dragon":      ["Natura","Roost","Burn Dragon","OTK Dragon"],
+  "Haven":       ["Mejiro","Wards","Heal Haven","Storm Haven"],
+  "Abyss":       ["Rulenye","Yuzuki","Invoke","Aggro Abyss"],
+  "Vanguard":    ["Kagero","Royal Paladin","Gold Paladin","Spike Brothers"],
+  "Uma musume":  ["Aggro","Midrange Uma","Support Uma"],
+  "IM@S":        ["Aggro IM@S","Midrange IM@S","Control IM@S"],
+  "Priconne":    ["Priconne"],
+};
+
+const CRAFT_COLORS = {
+  "Forest":"#3ecf8e","Sword":"#e07050","Rune":"#9b8fff","Dragon":"#e05c5c",
+  "Haven":"#5b8cff","Abyss":"#4fc8b0","Vanguard":"#d4a847",
+  "Uma musume":"#e080b0","IM@S":"#b08fff","Priconne":"#8890a8"
+};
+
+// ── Script URL (persisted in localStorage) ──────────────────
+let SCRIPT_URL = localStorage.getItem('svhq_script_url') || '';
+
+function saveScriptUrl() {
+  SCRIPT_URL = document.getElementById('script-url').value.trim();
+  localStorage.setItem('svhq_script_url', SCRIPT_URL);
+}
+
+// ── Init ────────────────────────────────────────────────────
+function init() {
+  // Populate craft selects
+  ['p1-craft','p2-craft','p3-craft'].forEach(id => {
+    const sel = document.getElementById(id);
+    Object.keys(CRAFTS).forEach(c => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      sel.appendChild(o);
+    });
+  });
+
+  // Default date to today
+  document.getElementById('t-date').value = new Date().toISOString().split('T')[0];
+
+  // Load saved URL into config input
+  if (SCRIPT_URL) {
+    document.getElementById('script-url').value = SCRIPT_URL;
+  }
+
+  checkConnection();
+}
+
+// ── Connection check ─────────────────────────────────────────
+function checkConnection() {
+  const bar = document.getElementById('conn-status');
+  const txt = document.getElementById('conn-text');
+
+  if (!SCRIPT_URL) {
+    bar.className = 'status-bar err';
+    txt.textContent = 'Sin configurar. Ve a Config y pega la URL del script.';
+    return;
+  }
+
+  bar.className = 'status-bar info';
+  txt.textContent = 'Conectando con Google Sheets...';
+
+  fetchGet('getLeaderboard')
+    .then(() => {
+      bar.className = 'status-bar ok';
+      txt.textContent = 'Conectado a Google Sheets ✓';
+      loadLeaderboard();
+      loadHistory();
+    })
+    .catch(() => {
+      bar.className = 'status-bar err';
+      txt.textContent = 'Error de conexión. Revisa la URL en Config.';
+    });
+}
+
+function testConnection() {
+  SCRIPT_URL = document.getElementById('script-url').value.trim();
+  localStorage.setItem('svhq_script_url', SCRIPT_URL);
+  checkConnection();
+  showToast('Probando conexión...', '');
+}
+
+// ── API calls ────────────────────────────────────────────────
+function fetchGet(action) {
+  const url = SCRIPT_URL + '?action=' + action + '&t=' + Date.now();
+  return fetch(url).then(r => r.json());
+}
+
+function fetchPost(payload) {
+  return fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: { 'Content-Type': 'application/json' }
+  }).then(r => r.json());
+}
+
+// ── Save result ──────────────────────────────────────────────
+function saveResult() {
+  if (!SCRIPT_URL) {
+    showToast('Configura la URL del script primero', 'error');
+    showTab('config');
+    return;
+  }
+
+  const name = document.getElementById('t-name').value.trim();
+  const date = document.getElementById('t-date').value;
+  if (!name || !date) { showToast('Completa nombre y fecha del torneo', 'error'); return; }
+
+  const entries = ['p1','p2','p3']
+    .map((p, i) => getEntry(p, ['1st','2nd','3rd'][i]))
+    .filter(Boolean);
+
+  if (!entries.length) { showToast('Agrega al menos un jugador', 'error'); return; }
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Guardando...';
+
+  fetchPost({
+    action: 'saveResult',
+    payload: {
+      tournament: name,
+      date,
+      type: document.getElementById('t-type').value,
+      entries
+    }
+  })
+  .then(res => {
+    if (res.success) {
+      showToast('¡Resultado guardado en Google Sheets!', 'success');
+      clearForm();
+      loadLeaderboard();
+      loadHistory();
+    } else {
+      showToast('Error: ' + (res.error || 'desconocido'), 'error');
+    }
+  })
+  .catch(() => showToast('Error de red. Revisa tu conexión.', 'error'))
+  .finally(() => {
+    btn.disabled = false;
+    btn.innerHTML = 'Guardar resultado';
+  });
+}
+
+function getEntry(prefix, placement) {
+  const player = document.getElementById(prefix+'-player').value.trim();
+  if (!player) return null;
+  return {
+    placement,
+    player,
+    craft:  document.getElementById(prefix+'-craft').value,
+    deck:   document.getElementById(prefix+'-deck-custom').value.trim() || document.getElementById(prefix+'-deck').value,
+    link:   document.getElementById(prefix+'-link').value.trim()
+  };
+}
+
+// ── Leaderboard ──────────────────────────────────────────────
+function loadLeaderboard() {
+  fetchGet('getLeaderboard').then(res => {
+    const tbody = document.getElementById('lb-body');
+    if (!res.success || !res.data.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="hist-empty">Sin resultados aún</td></tr>';
+      return;
+    }
+    const medals = ['🥇','🥈','🥉'];
+    tbody.innerHTML = res.data.map((p, i) => `
+      <tr>
+        <td class="lb-rank">${medals[i] || i+1}</td>
+        <td>${p.name}</td>
+        <td style="text-align:center;color:var(--gold)">${p.first}</td>
+        <td style="text-align:center;color:var(--silver)">${p.second}</td>
+        <td style="text-align:center;color:var(--bronze)">${p.third}</td>
+        <td class="lb-pts">${p.total}</td>
+      </tr>`).join('');
+  }).catch(() => {
+    document.getElementById('lb-body').innerHTML =
+      '<tr><td colspan="6" class="hist-empty">Error al cargar datos</td></tr>';
+  });
+}
+
+// ── Historial ────────────────────────────────────────────────
+function loadHistory() {
+  fetchGet('getResults').then(res => {
+    const container = document.getElementById('historial-list');
+    if (!res.success || !res.data.length) {
+      container.innerHTML = '<div class="hist-empty">Sin torneos registrados aún</div>';
+      return;
+    }
+    container.innerHTML = res.data.map(r => {
+      const d = r.date
+        ? new Date(r.date + 'T12:00:00').toLocaleDateString('es-MX', { weekday:'short', day:'numeric', month:'short' })
+        : '';
+      const chips = r.entries.map(e => {
+        const color = CRAFT_COLORS[e.craft] || '#8890a8';
+        const pl = e.placement==='1st' ? '🥇' : e.placement==='2nd' ? '🥈' : '🥉';
+        return `<span class="player-chip">
+          ${pl}
+          <strong style="font-weight:600">${e.player}</strong>
+          ${e.craft ? `<span class="craft-dot" style="background:${color}"></span><span style="color:${color};font-size:12px">${e.craft}</span>` : ''}
+        </span>`;
+      }).join('');
+      const typeLabel = r.type === 'special'
+        ? ' · <span style="color:#9b8fff;font-size:11px">especial</span>' : '';
+      return `<div class="hist-item">
+        <div class="hist-meta">${r.tournament} · ${d}${typeLabel}</div>
+        <div class="hist-players">${chips}</div>
+      </div>`;
+    }).join('');
+  }).catch(() => {
+    document.getElementById('historial-list').innerHTML =
+      '<div class="hist-empty">Error al cargar historial</div>';
+  });
+}
+
+// ── UI helpers ───────────────────────────────────────────────
+function updateDecks(prefix) {
+  const craft = document.getElementById(prefix+'-craft').value;
+  const sel   = document.getElementById(prefix+'-deck');
+  sel.innerHTML = '<option value="">— Seleccionar —</option>';
+  if (craft && CRAFTS[craft]) {
+    CRAFTS[craft].forEach(d => {
+      const o = document.createElement('option');
+      o.value = d; o.textContent = d;
+      sel.appendChild(o);
+    });
+  }
+}
+
+function clearForm() {
+  document.getElementById('t-name').value = '';
+  document.getElementById('t-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('t-type').value = 'regular';
+  ['p1','p2','p3'].forEach(p => {
+    document.getElementById(p+'-player').value = '';
+    document.getElementById(p+'-craft').value = '';
+    document.getElementById(p+'-deck').innerHTML = '<option value="">— Seleccionar craft primero —</option>';
+    document.getElementById(p+'-deck-custom').value = '';
+    document.getElementById(p+'-link').value = '';
+  });
+}
+
+function showTab(name) {
+  const names = ['registro','leaderboard','historial','config'];
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+let toastTimer;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + (type || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 3000);
+}
+
+init();
+</script>
+</body>
+</html>
