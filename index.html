@@ -674,6 +674,7 @@ function saveResult() {
 
   const name = document.getElementById('t-name').value.trim();
   const date = document.getElementById('t-date').value;
+  const type = document.getElementById('t-type').value;
   if (!name || !date) { showToast('Completa nombre y fecha del torneo', 'error'); return; }
 
   const entries = ['p1','p2','p3']
@@ -684,16 +685,59 @@ function saveResult() {
 
   const btn = document.getElementById('btn-save');
   btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Validando...';
+
+  fetchGet('getResults')
+    .then(res => {
+      if (!res.success) throw new Error('No se pudo obtener historial');
+
+      const existingResults = res.data || [];
+      const duplicateWarnings = [];
+
+      existingResults.forEach(r => {
+        if (r.date === date && r.type === type) {
+          const existingTop3 = ['1st','2nd','3rd'].map(pl => {
+            const e = r.entries.find(x => x.placement === pl);
+            return e ? e.player.toLowerCase() : '';
+          });
+          const newTop3 = ['1st','2nd','3rd'].map(pl => {
+            const e = entries.find(x => x.placement === pl);
+            return e ? e.player.toLowerCase() : '';
+          });
+          const isExactDuplicate = existingTop3.every((p, i) => p === newTop3[i]);
+          if (isExactDuplicate) {
+            duplicateWarnings.push('Ya existe un torneo ' + (type === 'special' ? 'especial' : 'regular') + ' registrado el ' + date + ' con exactamente el mismo top 3 (' + r.tournament + ').');
+          }
+        }
+      });
+
+      const uniqueWarnings = [...new Set(duplicateWarnings)];
+
+      if (uniqueWarnings.length > 0) {
+        btn.disabled = false;
+        btn.innerHTML = 'Guardar resultado';
+        showDuplicateWarning(uniqueWarnings, () => {
+          doSave(name, date, type, entries, btn);
+        });
+        return;
+      }
+
+      doSave(name, date, type, entries, btn);
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.innerHTML = 'Guardar resultado';
+      showToast('Error al validar duplicados. Intenta de nuevo.', 'error');
+    });
+}
+
+function doSave(name, date, type, entries, btn) {
+  btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Guardando...';
 
   fetchPost({
     action: 'saveResult',
-    payload: {
-      tournament: name,
-      date,
-      type: document.getElementById('t-type').value,
-      entries
-    }
+    payload: { tournament: name, date, type, entries }
   })
   .then(res => {
     if (res.success) {
@@ -710,6 +754,39 @@ function saveResult() {
     btn.disabled = false;
     btn.innerHTML = 'Guardar resultado';
   });
+}
+
+function showDuplicateWarning(warnings, onConfirm) {
+  const existing = document.getElementById('dup-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'dup-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;';
+
+  modal.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:24px;max-width:420px;width:100%;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <span style="font-size:20px;">⚠️</span>
+        <span style="font-size:15px;font-weight:600;color:var(--text);">Posible duplicado detectado</span>
+      </div>
+      <div style="margin-bottom:20px;">
+        ${warnings.map(w => `<p style="font-size:13px;color:var(--muted);margin-bottom:8px;padding:8px 12px;background:rgba(224,92,92,0.08);border:1px solid rgba(224,92,92,0.2);border-radius:var(--radius);">${w}</p>`).join('')}
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">¿Quieres guardar de todas formas?</p>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="dup-cancel" class="btn" style="font-size:13px;padding:8px 16px;">Cancelar</button>
+        <button id="dup-confirm" class="btn" style="font-size:13px;padding:8px 16px;background:var(--red);border-color:var(--red);color:#fff;">Guardar de todas formas</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('dup-cancel').onclick = () => modal.remove();
+  document.getElementById('dup-confirm').onclick = () => {
+    modal.remove();
+    onConfirm();
+  };
 }
 
 function getEntry(prefix, placement) {
