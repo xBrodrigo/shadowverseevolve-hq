@@ -586,7 +586,7 @@ const CRAFT_COLORS = {
 };
 
 // ── Script URL (persisted in localStorage) ──────────────────
-let SCRIPT_URL = localStorage.getItem('svhq_script_url') || 'https://script.google.com/macros/s/AKfycbzp58h3niWkS6IXikj92ZKAJbLdk6aIB3-7gJf_Jwm7YQZHCA3ZZH47EfWXUlxZoXoB/exec';
+let SCRIPT_URL = localStorage.getItem('svhq_script_url') || 'https://script.google.com/macros/s/AKfycbwors1l4TVosDZyuMAKm4Okm4reB4nKt_WVvJOS58KENRZZ1VjXa54YIWyyRwagCYON/exec';
 
 function saveScriptUrl() {
   SCRIPT_URL = document.getElementById('script-url').value.trim();
@@ -657,11 +657,12 @@ function fetchGet(action) {
 }
 
 function fetchPost(payload) {
-  return fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-    headers: { 'Content-Type': 'application/json' }
-  }).then(r => r.json());
+  const params = new URLSearchParams({
+    action: payload.action,
+    data: JSON.stringify(payload.payload),
+    t: Date.now()
+  });
+  return fetch(SCRIPT_URL + '?' + params.toString()).then(r => r.json());
 }
 
 // ── Save result ──────────────────────────────────────────────
